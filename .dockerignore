@@ -1,0 +1,11 @@
+__pycache__
+*.http
+*.sql
+*.db
+*.yml
+# .env
+.gitignore
+.log
+exercises.py
+Учебные_примеры/
+.git

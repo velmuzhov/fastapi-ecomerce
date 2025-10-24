@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: psgr_ecommerce
+    environment:
+      - POSTGRES_USER=ecommerce_user
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=ecommerce_db
+    volumes:
+      - postgres-ecommerce:/var/lib/postgresql/data
+    ports:
+      - 127.0.0.1:5750:5432
+    # networks:
+    #   - dbnet
+
+ 
+
+volumes:
+  postgres-ecommerce:
+
+# CREATE USER ecommerce_user WITH PASSWORD '1234'
