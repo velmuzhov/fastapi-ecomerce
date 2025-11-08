@@ -34,7 +34,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
-    op.add_column('products', sa.Column('rating', sa.Float(), nullable=False))
+    op.add_column('products', sa.Column('rating', sa.Float(), nullable=False, server_default=sa.text("0.0")))
     # ### end Alembic commands ###
 
 

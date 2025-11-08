@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select, update
+from typing import Annotated
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy import select, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.categories import Category as CategoryModel
 from app.models.products import Product as ProductModel
-from app.schemas import Product as ProductSchema, ProductCreate
+from app.schemas import Product as ProductSchema, ProductCreate, ProductList
 from app.db_depends import get_async_db
 
 from app.models.users import User as UserModel
@@ -18,10 +19,14 @@ router = APIRouter(
 
 @router.get(
     "/",
-    response_model=list[ProductSchema],
+    response_model=ProductList,
     status_code=status.HTTP_200_OK,
 )
-async def get_all_products(db: AsyncSession = Depends(get_async_db)):
+async def get_all_products(
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 20,
+    db: AsyncSession = Depends(get_async_db),
+):
     """
     Возвращает список всех товаров.
     """
@@ -29,16 +34,39 @@ async def get_all_products(db: AsyncSession = Depends(get_async_db)):
     #     select(ProductModel).where(ProductModel.is_active == True)
     # ).all()
 
-    result = await db.scalars(
+    # result = await db.scalars(
+    #     select(ProductModel)
+    #     .join(CategoryModel)
+    #     .where(
+    #         ProductModel.is_active == True,
+    #         CategoryModel.is_active == True,
+    #     )
+    # )
+
+    total = await db.scalar(
+        select(func.count())
+        .select_from(ProductModel)
+        .where(ProductModel.is_active == True)
+    ) or 0
+
+    products_stmt = (
         select(ProductModel)
-        .join(CategoryModel)
-        .where(
-            ProductModel.is_active == True,
-            CategoryModel.is_active == True,
-        )
+        .where(ProductModel.is_active == True)
+        .order_by(ProductModel.id)
+        .offset((page - 1) * page_size)
+        .limit(page_size)
     )
 
-    return result.all()
+    result = await db.scalars(products_stmt)
+
+    items = result.all()
+
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "page_size": page_size
+    }
 
 
 @router.post(
@@ -202,7 +230,11 @@ async def update_product(
     return product
 
 
-@router.delete("/{product_id}", status_code=status.HTTP_200_OK, response_model=ProductSchema,)
+@router.delete(
+    "/{product_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=ProductSchema,
+)
 async def delete_product(
     product_id: int,
     db: AsyncSession = Depends(get_async_db),
@@ -224,7 +256,7 @@ async def delete_product(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Product not found",
         )
-    
+
     if product.seller_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

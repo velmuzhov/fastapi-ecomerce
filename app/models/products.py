@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 from decimal import Decimal
-from sqlalchemy import String, Integer, Numeric, ForeignKey, Float
+from sqlalchemy import String, Integer, Numeric, ForeignKey, Float, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -22,7 +22,7 @@ class Product(Base):
     )
     image_url: Mapped[str | None] = mapped_column(String(200), nullable=True)
     stock: Mapped[int] = mapped_column(Integer, nullable=False)
-    rating: Mapped[float] = mapped_column(Float, default=0.0)
+    rating: Mapped[float] = mapped_column(Float, default=0.0, server_default=text("0.0"))
     is_active: Mapped[bool] = mapped_column(default=True)
     seller_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
 
