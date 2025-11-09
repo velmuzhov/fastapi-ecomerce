@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from app.models.categories import Category
     from app.models.users import User
     from app.models.reviews import Review
+    from app.models.cart_items import CartItem
 
 
 class Product(Base):
@@ -56,6 +57,11 @@ class Product(Base):
     category: Mapped["Category"] = relationship("Category", back_populates="products")
     seller: Mapped["User"] = relationship("User", back_populates="products")
     reviews: Mapped[list["Review"]] = relationship("Review", back_populates="product")
+    cart_items: Mapped[list["CartItem"]] = relationship(
+        "CartItem",
+        back_populates="product",
+        cascade="all, delete-orphan",
+    )
 
     __table_args__ = (
         Index(

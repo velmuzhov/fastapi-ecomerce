@@ -6,6 +6,7 @@ from app.database import Base
 
 if TYPE_CHECKING:
     from app.models.products import Product
+    from app.models.cart_items import CartItem
 
 
 class User(Base):
@@ -18,3 +19,8 @@ class User(Base):
     role: Mapped[str] = mapped_column(String, default="buyer")
 
     products: Mapped[list["Product"]] = relationship("Product", back_populates="seller")
+    cart_items: Mapped[list["CartItem"]] = relationship(
+        "CartItem",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
