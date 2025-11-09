@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from loguru import logger
 
-from app.routers import categories, products, users, reviews
+from app.routers import categories, products, users, reviews, cart
 
 logger.add(
     sink="info.log",
@@ -39,6 +39,7 @@ app.include_router(categories.router)
 app.include_router(products.router)
 app.include_router(users.router)
 app.include_router(reviews.router)
+app.include_router(cart.router)
 
 
 # Корневой endpoint для проверки
