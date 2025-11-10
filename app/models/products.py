@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from app.models.users import User
     from app.models.reviews import Review
     from app.models.cart_items import CartItem
+    from app.models.orders import OrderItem
 
 
 class Product(Base):
@@ -62,6 +63,7 @@ class Product(Base):
         back_populates="product",
         cascade="all, delete-orphan",
     )
+    order_items: Mapped[list["OrderItem"]] = relationship("OrderItem", back_populates="product")
 
     __table_args__ = (
         Index(
