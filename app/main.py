@@ -1,6 +1,7 @@
 from uuid import uuid4
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from loguru import logger
 
 from app.routers import categories, products, users, reviews, cart, orders
@@ -17,6 +18,8 @@ app = FastAPI(
     title="FastAPI Интернет-магазин",
     version="0.1.0",
 )
+
+app.mount("/media", StaticFiles(directory="media"), name="media")
 
 @app.middleware("http")
 async def log_middleware(request: Request, call_next):
